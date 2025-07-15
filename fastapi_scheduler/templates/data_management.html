@@ -1,0 +1,483 @@
+{% extends "base.html" %}
+
+{% block title %}Data Management - SIGASIG{% endblock %}
+
+{% block content %}
+<div x-data="dataManagement()" x-init="init()">
+    <!-- Header -->
+    <div class="mb-8">
+        <h1 class="text-3xl font-bold text-gray-900">Data Management</h1>
+        <p class="text-gray-600 mt-2">Manage teachers, rooms, and classes for optimal scheduling</p>
+    </div>
+    
+    <!-- Tabs -->
+    <div class="border-b border-gray-200 mb-8">
+        <nav class="-mb-px flex space-x-8">
+            <button @click="activeTab = 'teachers'" 
+                    :class="activeTab === 'teachers' ? 'border-blue-500 text-blue-600' : 'border-transparent text-gray-500 hover:text-gray-700 hover:border-gray-300'"
+                    class="whitespace-nowrap py-2 px-1 border-b-2 font-medium text-sm">
+                👨‍🏫 Teachers
+            </button>
+            <button @click="activeTab = 'rooms'" 
+                    :class="activeTab === 'rooms' ? 'border-blue-500 text-blue-600' : 'border-transparent text-gray-500 hover:text-gray-700 hover:border-gray-300'"
+                    class="whitespace-nowrap py-2 px-1 border-b-2 font-medium text-sm">
+                🏢 Rooms
+            </button>
+            <button @click="activeTab = 'classes'" 
+                    :class="activeTab === 'classes' ? 'border-blue-500 text-blue-600' : 'border-transparent text-gray-500 hover:text-gray-700 hover:border-gray-300'"
+                    class="whitespace-nowrap py-2 px-1 border-b-2 font-medium text-sm">
+                📚 Classes
+            </button>
+        </nav>
+    </div>
+    
+    <!-- Teachers Tab -->
+    <div x-show="activeTab === 'teachers'" class="space-y-6">
+        <!-- Add Teacher Form -->
+        <div class="card p-6">
+            <h3 class="text-lg font-semibold text-gray-900 mb-4">Add New Teacher</h3>
+            <form @submit.prevent="addTeacher()">
+                <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
+                    <div>
+                        <label class="block text-sm font-medium text-gray-700 mb-1">Teacher ID*</label>
+                        <input x-model="newTeacher.id" type="text" required
+                               class="w-full px-3 py-2 border border-gray-300 rounded-md focus:ring-blue-500 focus:border-blue-500"
+                               placeholder="T001">
+                    </div>
+                    <div>
+                        <label class="block text-sm font-medium text-gray-700 mb-1">Major Subject*</label>
+                        <input x-model="newTeacher.major" type="text" required
+                               class="w-full px-3 py-2 border border-gray-300 rounded-md focus:ring-blue-500 focus:border-blue-500"
+                               placeholder="Mathematics">
+                    </div>
+                    <div>
+                        <label class="block text-sm font-medium text-gray-700 mb-1">Minor Subject</label>
+                        <input x-model="newTeacher.minor" type="text"
+                               class="w-full px-3 py-2 border border-gray-300 rounded-md focus:ring-blue-500 focus:border-blue-500"
+                               placeholder="Physics">
+                    </div>
+                </div>
+                <div class="mt-4 flex justify-end">
+                    <button type="submit" class="btn-primary">Add Teacher</button>
+                </div>
+            </form>
+        </div>
+        
+        <!-- Teachers Table -->
+        <div class="card p-6">
+            <h3 class="text-lg font-semibold text-gray-900 mb-4">Teachers List</h3>
+            <div class="overflow-x-auto">
+                <table class="min-w-full divide-y divide-gray-200">
+                    <thead class="bg-gray-50">
+                        <tr>
+                            <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">ID</th>
+                            <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Major</th>
+                            <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Minor</th>
+                            <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Actions</th>
+                        </tr>
+                    </thead>
+                    <tbody class="bg-white divide-y divide-gray-200">
+                        <template x-for="teacher in teachers" :key="teacher.id">
+                            <tr>
+                                <td class="px-6 py-4 whitespace-nowrap text-sm font-medium text-gray-900" x-text="teacher.id"></td>
+                                <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500" x-text="teacher.major"></td>
+                                <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500" x-text="teacher.minor"></td>
+                                <td class="px-6 py-4 whitespace-nowrap text-sm font-medium">
+                                    <button @click="editTeacher(teacher)" class="text-blue-600 hover:text-blue-900 mr-3">Edit</button>
+                                    <button @click="deleteTeacher(teacher.id)" class="text-red-600 hover:text-red-900">Delete</button>
+                                </td>
+                            </tr>
+                        </template>
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    </div>
+    
+    <!-- Rooms Tab -->
+    <div x-show="activeTab === 'rooms'" class="space-y-6">
+        <!-- Add Room Form -->
+        <div class="card p-6">
+            <h3 class="text-lg font-semibold text-gray-900 mb-4">Add New Room</h3>
+            <form @submit.prevent="addRoom()">
+                <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
+                    <div>
+                        <label class="block text-sm font-medium text-gray-700 mb-1">Room ID*</label>
+                        <input x-model="newRoom.id" type="text" required
+                               class="w-full px-3 py-2 border border-gray-300 rounded-md focus:ring-blue-500 focus:border-blue-500"
+                               placeholder="R001">
+                    </div>
+                    <div>
+                        <label class="block text-sm font-medium text-gray-700 mb-1">Capacity*</label>
+                        <input x-model="newRoom.capacity" type="number" required min="1"
+                               class="w-full px-3 py-2 border border-gray-300 rounded-md focus:ring-blue-500 focus:border-blue-500"
+                               placeholder="30">
+                    </div>
+                    <div>
+                        <label class="block text-sm font-medium text-gray-700 mb-1">Room Type</label>
+                        <select x-model="newRoom.type"
+                                class="w-full px-3 py-2 border border-gray-300 rounded-md focus:ring-blue-500 focus:border-blue-500">
+                            <option value="Classroom">Classroom</option>
+                            <option value="Laboratory">Laboratory</option>
+                            <option value="Computer Lab">Computer Lab</option>
+                            <option value="Library">Library</option>
+                            <option value="Music Room">Music Room</option>
+                            <option value="Art Room">Art Room</option>
+                            <option value="Gymnasium">Gymnasium</option>
+                            <option value="Counseling Room">Counseling Room</option>
+                            <option value="Auditorium">Auditorium</option>
+                            <option value="Multi-Purpose Hall">Multi-Purpose Hall</option>
+                            <option value="Tutorial Room">Tutorial Room</option>
+                        </select>
+                    </div>
+                </div>
+                <div class="mt-4 flex justify-end">
+                    <button type="submit" class="btn-primary">Add Room</button>
+                </div>
+            </form>
+        </div>
+        
+        <!-- Rooms Table -->
+        <div class="card p-6">
+            <h3 class="text-lg font-semibold text-gray-900 mb-4">Rooms List</h3>
+            <div class="overflow-x-auto">
+                <table class="min-w-full divide-y divide-gray-200">
+                    <thead class="bg-gray-50">
+                        <tr>
+                            <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">ID</th>
+                            <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Capacity</th>
+                            <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Type</th>
+                            <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Actions</th>
+                        </tr>
+                    </thead>
+                    <tbody class="bg-white divide-y divide-gray-200">
+                        <template x-for="room in rooms" :key="room.id">
+                            <tr>
+                                <td class="px-6 py-4 whitespace-nowrap text-sm font-medium text-gray-900" x-text="room.id"></td>
+                                <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500" x-text="room.capacity"></td>
+                                <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500" x-text="room.type"></td>
+                                <td class="px-6 py-4 whitespace-nowrap text-sm font-medium">
+                                    <button @click="editRoom(room)" class="text-blue-600 hover:text-blue-900 mr-3">Edit</button>
+                                    <button @click="deleteRoom(room.id)" class="text-red-600 hover:text-red-900">Delete</button>
+                                </td>
+                            </tr>
+                        </template>
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    </div>
+    
+    <!-- Classes Tab -->
+    <div x-show="activeTab === 'classes'" class="space-y-6">
+        <!-- Add Class Form -->
+        <div class="card p-6">
+            <h3 class="text-lg font-semibold text-gray-900 mb-4">Add New Class</h3>
+            <form @submit.prevent="addClass()">
+                <div class="grid grid-cols-1 md:grid-cols-4 gap-4">
+                    <div>
+                        <label class="block text-sm font-medium text-gray-700 mb-1">Class ID*</label>
+                        <input x-model="newClass.id" type="text" required
+                               class="w-full px-3 py-2 border border-gray-300 rounded-md focus:ring-blue-500 focus:border-blue-500"
+                               placeholder="C001">
+                    </div>
+                    <div>
+                        <label class="block text-sm font-medium text-gray-700 mb-1">Subject*</label>
+                        <input x-model="newClass.subject" type="text" required
+                               class="w-full px-3 py-2 border border-gray-300 rounded-md focus:ring-blue-500 focus:border-blue-500"
+                               placeholder="Mathematics">
+                    </div>
+                    <div>
+                        <label class="block text-sm font-medium text-gray-700 mb-1">Times per Week*</label>
+                        <input x-model="newClass.times_per_week" type="number" required min="1"
+                               class="w-full px-3 py-2 border border-gray-300 rounded-md focus:ring-blue-500 focus:border-blue-500"
+                               placeholder="3">
+                    </div>
+                    <div>
+                        <label class="block text-sm font-medium text-gray-700 mb-1">Duration (hours)*</label>
+                        <input x-model="newClass.duration" type="number" required min="1"
+                               class="w-full px-3 py-2 border border-gray-300 rounded-md focus:ring-blue-500 focus:border-blue-500"
+                               placeholder="1">
+                    </div>
+                </div>
+                <div class="mt-4 flex justify-end">
+                    <button type="submit" class="btn-primary">Add Class</button>
+                </div>
+            </form>
+        </div>
+        
+        <!-- Classes Table -->
+        <div class="card p-6">
+            <h3 class="text-lg font-semibold text-gray-900 mb-4">Classes List</h3>
+            <div class="overflow-x-auto">
+                <table class="min-w-full divide-y divide-gray-200">
+                    <thead class="bg-gray-50">
+                        <tr>
+                            <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">ID</th>
+                            <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Subject</th>
+                            <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Times/Week</th>
+                            <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Duration</th>
+                            <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Actions</th>
+                        </tr>
+                    </thead>
+                    <tbody class="bg-white divide-y divide-gray-200">
+                        <template x-for="classItem in classes" :key="classItem.id">
+                            <tr>
+                                <td class="px-6 py-4 whitespace-nowrap text-sm font-medium text-gray-900" x-text="classItem.id"></td>
+                                <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500" x-text="classItem.subject"></td>
+                                <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500" x-text="classItem.times_per_week"></td>
+                                <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500" x-text="classItem.duration"></td>
+                                <td class="px-6 py-4 whitespace-nowrap text-sm font-medium">
+                                    <button @click="editClass(classItem)" class="text-blue-600 hover:text-blue-900 mr-3">Edit</button>
+                                    <button @click="deleteClass(classItem.id)" class="text-red-600 hover:text-red-900">Delete</button>
+                                </td>
+                            </tr>
+                        </template>
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block scripts %}
+<script>
+function dataManagement() {
+    return {
+        activeTab: 'teachers',
+        teachers: [
+            // Mathematics Department
+            { id: 'T001', major: 'Mathematics', minor: 'Physics' },
+            { id: 'T002', major: 'Mathematics', minor: 'Statistics' },
+            { id: 'T003', major: 'Mathematics', minor: 'Computer Science' },
+            
+            // Science Department
+            { id: 'T004', major: 'Physics', minor: 'Mathematics' },
+            { id: 'T005', major: 'Chemistry', minor: 'Biology' },
+            { id: 'T006', major: 'Biology', minor: 'Health Science' },
+            
+            // Language Arts Department
+            { id: 'T007', major: 'English', minor: 'Literature' },
+            { id: 'T008', major: 'English', minor: 'Creative Writing' },
+            { id: 'T009', major: 'Filipino', minor: 'History' },
+            
+            // Social Studies Department
+            { id: 'T010', major: 'History', minor: 'Geography' },
+            { id: 'T011', major: 'Geography', minor: 'Economics' },
+            { id: 'T012', major: 'Economics', minor: 'Business Studies' },
+            
+            // Technology & Arts Department
+            { id: 'T013', major: 'Computer Science', minor: 'Mathematics' },
+            { id: 'T014', major: 'Arts', minor: 'Music' },
+            { id: 'T015', major: 'Physical Education', minor: 'Health Science' }
+        ],
+        rooms: [
+            // Regular Classrooms
+            { id: 'R001', capacity: 35, type: 'Classroom' },
+            { id: 'R002', capacity: 30, type: 'Classroom' },
+            { id: 'R003', capacity: 40, type: 'Classroom' },
+            { id: 'R004', capacity: 32, type: 'Classroom' },
+            { id: 'R005', capacity: 28, type: 'Classroom' },
+            { id: 'R006', capacity: 36, type: 'Classroom' },
+            { id: 'R007', capacity: 38, type: 'Classroom' },
+            { id: 'R008', capacity: 30, type: 'Classroom' },
+            
+            // Science Laboratories
+            { id: 'R101', capacity: 25, type: 'Laboratory' },
+            { id: 'R102', capacity: 24, type: 'Laboratory' },
+            { id: 'R103', capacity: 20, type: 'Laboratory' },
+            { id: 'R104', capacity: 22, type: 'Laboratory' },
+            
+            // Computer Labs
+            { id: 'R201', capacity: 30, type: 'Computer Lab' },
+            { id: 'R202', capacity: 28, type: 'Computer Lab' },
+            { id: 'R203', capacity: 32, type: 'Computer Lab' },
+            
+            // Specialized Rooms
+            { id: 'R301', capacity: 50, type: 'Library' },
+            { id: 'R302', capacity: 45, type: 'Library' },
+            { id: 'R401', capacity: 40, type: 'Music Room' },
+            { id: 'R402', capacity: 35, type: 'Art Room' },
+            { id: 'R403', capacity: 60, type: 'Gymnasium' },
+            { id: 'R404', capacity: 20, type: 'Counseling Room' },
+            
+            // Large Venues
+            { id: 'R501', capacity: 100, type: 'Auditorium' },
+            { id: 'R502', capacity: 150, type: 'Multi-Purpose Hall' },
+            
+            // Small Group Rooms
+            { id: 'R601', capacity: 15, type: 'Tutorial Room' },
+            { id: 'R602', capacity: 12, type: 'Tutorial Room' },
+            { id: 'R603', capacity: 18, type: 'Tutorial Room' }
+        ],
+        classes: [
+            // Grade 7 Classes
+            { id: 'G7-MATH-A', subject: 'Mathematics', times_per_week: 5, duration: 1 },
+            { id: 'G7-MATH-B', subject: 'Mathematics', times_per_week: 5, duration: 1 },
+            { id: 'G7-SCI-A', subject: 'Science', times_per_week: 4, duration: 1 },
+            { id: 'G7-SCI-B', subject: 'Science', times_per_week: 4, duration: 1 },
+            { id: 'G7-ENG-A', subject: 'English', times_per_week: 5, duration: 1 },
+            { id: 'G7-ENG-B', subject: 'English', times_per_week: 5, duration: 1 },
+            { id: 'G7-FIL-A', subject: 'Filipino', times_per_week: 4, duration: 1 },
+            { id: 'G7-FIL-B', subject: 'Filipino', times_per_week: 4, duration: 1 },
+            { id: 'G7-HIST-A', subject: 'History', times_per_week: 3, duration: 1 },
+            { id: 'G7-HIST-B', subject: 'History', times_per_week: 3, duration: 1 },
+            
+            // Grade 8 Classes
+            { id: 'G8-MATH-A', subject: 'Mathematics', times_per_week: 5, duration: 1 },
+            { id: 'G8-MATH-B', subject: 'Mathematics', times_per_week: 5, duration: 1 },
+            { id: 'G8-PHYS-A', subject: 'Physics', times_per_week: 4, duration: 1 },
+            { id: 'G8-PHYS-B', subject: 'Physics', times_per_week: 4, duration: 1 },
+            { id: 'G8-CHEM-A', subject: 'Chemistry', times_per_week: 3, duration: 1 },
+            { id: 'G8-CHEM-B', subject: 'Chemistry', times_per_week: 3, duration: 1 },
+            { id: 'G8-ENG-A', subject: 'English', times_per_week: 5, duration: 1 },
+            { id: 'G8-ENG-B', subject: 'English', times_per_week: 5, duration: 1 },
+            { id: 'G8-GEO-A', subject: 'Geography', times_per_week: 3, duration: 1 },
+            { id: 'G8-GEO-B', subject: 'Geography', times_per_week: 3, duration: 1 },
+            
+            // Grade 9 Classes
+            { id: 'G9-MATH-A', subject: 'Mathematics', times_per_week: 5, duration: 1 },
+            { id: 'G9-MATH-B', subject: 'Mathematics', times_per_week: 5, duration: 1 },
+            { id: 'G9-BIO-A', subject: 'Biology', times_per_week: 4, duration: 1 },
+            { id: 'G9-BIO-B', subject: 'Biology', times_per_week: 4, duration: 1 },
+            { id: 'G9-LIT-A', subject: 'Literature', times_per_week: 4, duration: 1 },
+            { id: 'G9-LIT-B', subject: 'Literature', times_per_week: 4, duration: 1 },
+            { id: 'G9-ECON-A', subject: 'Economics', times_per_week: 3, duration: 1 },
+            { id: 'G9-ECON-B', subject: 'Economics', times_per_week: 3, duration: 1 },
+            { id: 'G9-CS-A', subject: 'Computer Science', times_per_week: 3, duration: 1 },
+            { id: 'G9-CS-B', subject: 'Computer Science', times_per_week: 3, duration: 1 },
+            
+            // Grade 10 Classes
+            { id: 'G10-MATH-A', subject: 'Mathematics', times_per_week: 5, duration: 1 },
+            { id: 'G10-MATH-B', subject: 'Mathematics', times_per_week: 5, duration: 1 },
+            { id: 'G10-PHYS-A', subject: 'Physics', times_per_week: 4, duration: 1 },
+            { id: 'G10-PHYS-B', subject: 'Physics', times_per_week: 4, duration: 1 },
+            { id: 'G10-CHEM-A', subject: 'Chemistry', times_per_week: 4, duration: 1 },
+            { id: 'G10-CHEM-B', subject: 'Chemistry', times_per_week: 4, duration: 1 },
+            { id: 'G10-ENG-A', subject: 'English', times_per_week: 5, duration: 1 },
+            { id: 'G10-ENG-B', subject: 'English', times_per_week: 5, duration: 1 },
+            { id: 'G10-POL-A', subject: 'Political Science', times_per_week: 3, duration: 1 },
+            { id: 'G10-POL-B', subject: 'Political Science', times_per_week: 3, duration: 1 },
+            
+            // Specialized Classes
+            { id: 'SPEC-ART-A', subject: 'Arts', times_per_week: 2, duration: 2 },
+            { id: 'SPEC-ART-B', subject: 'Arts', times_per_week: 2, duration: 2 },
+            { id: 'SPEC-MUS-A', subject: 'Music', times_per_week: 2, duration: 1 },
+            { id: 'SPEC-MUS-B', subject: 'Music', times_per_week: 2, duration: 1 },
+            { id: 'SPEC-PE-A', subject: 'Physical Education', times_per_week: 3, duration: 1 },
+            { id: 'SPEC-PE-B', subject: 'Physical Education', times_per_week: 3, duration: 1 },
+            { id: 'SPEC-PE-C', subject: 'Physical Education', times_per_week: 3, duration: 1 },
+            
+            // Advanced/Elective Classes
+            { id: 'ADV-STAT-A', subject: 'Statistics', times_per_week: 3, duration: 1 },
+            { id: 'ADV-IT-A', subject: 'Information Technology', times_per_week: 4, duration: 1 },
+            { id: 'ADV-EARTH-A', subject: 'Earth Science', times_per_week: 3, duration: 1 },
+            { id: 'ADV-HEALTH-A', subject: 'Health Science', times_per_week: 2, duration: 1 },
+            { id: 'ADV-BUS-A', subject: 'Business Studies', times_per_week: 3, duration: 1 },
+            
+            // Special Education
+            { id: 'SPED-MATH-A', subject: 'Special Education', times_per_week: 4, duration: 1 },
+            { id: 'SPED-READ-A', subject: 'Special Education', times_per_week: 5, duration: 1 },
+            
+            // Support Classes
+            { id: 'COUNS-GROUP-A', subject: 'Guidance Counseling', times_per_week: 1, duration: 1 },
+            { id: 'LIB-SKILLS-A', subject: 'Library Science', times_per_week: 1, duration: 1 }
+        ],
+        newTeacher: { id: '', major: '', minor: '' },
+        newRoom: { id: '', capacity: '', type: 'Classroom' },
+        newClass: { id: '', subject: '', times_per_week: '', duration: '' },
+        
+        init() {
+            // Initialize with sample data
+            this.loadData();
+        },
+        
+        loadData() {
+            // In a real app, this would load from the API
+            console.log('Loading data...');
+        },
+        
+        addTeacher() {
+            if (this.newTeacher.id && this.newTeacher.major) {
+                // Check for duplicates
+                if (this.teachers.find(t => t.id === this.newTeacher.id)) {
+                    this.$store.app.showNotification('Teacher ID already exists', 'error');
+                    return;
+                }
+                
+                this.teachers.push({ ...this.newTeacher });
+                this.newTeacher = { id: '', major: '', minor: '' };
+                this.$store.app.showNotification('Teacher added successfully', 'success');
+            }
+        },
+        
+        editTeacher(teacher) {
+            // In a real app, this would open an edit modal
+            this.$store.app.showNotification('Edit functionality coming soon', 'info');
+        },
+        
+        deleteTeacher(id) {
+            if (confirm('Are you sure you want to delete this teacher?')) {
+                this.teachers = this.teachers.filter(t => t.id !== id);
+                this.$store.app.showNotification('Teacher deleted successfully', 'success');
+            }
+        },
+        
+        addRoom() {
+            if (this.newRoom.id && this.newRoom.capacity) {
+                // Check for duplicates
+                if (this.rooms.find(r => r.id === this.newRoom.id)) {
+                    this.$store.app.showNotification('Room ID already exists', 'error');
+                    return;
+                }
+                
+                this.rooms.push({ ...this.newRoom, capacity: parseInt(this.newRoom.capacity) });
+                this.newRoom = { id: '', capacity: '', type: 'Classroom' };
+                this.$store.app.showNotification('Room added successfully', 'success');
+            }
+        },
+        
+        editRoom(room) {
+            this.$store.app.showNotification('Edit functionality coming soon', 'info');
+        },
+        
+        deleteRoom(id) {
+            if (confirm('Are you sure you want to delete this room?')) {
+                this.rooms = this.rooms.filter(r => r.id !== id);
+                this.$store.app.showNotification('Room deleted successfully', 'success');
+            }
+        },
+        
+        addClass() {
+            if (this.newClass.id && this.newClass.subject && this.newClass.times_per_week && this.newClass.duration) {
+                // Check for duplicates
+                if (this.classes.find(c => c.id === this.newClass.id)) {
+                    this.$store.app.showNotification('Class ID already exists', 'error');
+                    return;
+                }
+                
+                this.classes.push({ 
+                    ...this.newClass, 
+                    times_per_week: parseInt(this.newClass.times_per_week),
+                    duration: parseInt(this.newClass.duration)
+                });
+                this.newClass = { id: '', subject: '', times_per_week: '', duration: '' };
+                this.$store.app.showNotification('Class added successfully', 'success');
+            }
+        },
+        
+        editClass(classItem) {
+            this.$store.app.showNotification('Edit functionality coming soon', 'info');
+        },
+        
+        deleteClass(id) {
+            if (confirm('Are you sure you want to delete this class?')) {
+                this.classes = this.classes.filter(c => c.id !== id);
+                this.$store.app.showNotification('Class deleted successfully', 'success');
+            }
+        }
+    }
+}
+</script>
+{% endblock %}

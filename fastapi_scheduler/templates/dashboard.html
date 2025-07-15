@@ -1,0 +1,355 @@
+{% extends "base.html" %}
+
+{% block title %}Dashboard - SIGASIG{% endblock %}
+
+{% block content %}
+<div x-data="dashboard()" x-init="init()">
+    <!-- Header -->
+    <div class="mb-8">
+        <h1 class="text-3xl font-bold text-gray-900">Dashboard Overview</h1>
+        <p class="text-gray-600 mt-2">Monitor teacher specialization mismatch and scheduling efficiency</p>
+    </div>
+    
+    <!-- Loading State -->
+    <div x-show="loading" class="fixed inset-0 bg-black bg-opacity-25 flex items-center justify-center z-50">
+        <div class="bg-white p-6 rounded-lg shadow-lg">
+            <div class="animate-spin rounded-full h-12 w-12 border-b-2 border-blue-600 mx-auto"></div>
+            <p class="mt-4 text-center text-gray-600">Loading dashboard data...</p>
+        </div>
+    </div>
+    
+    <!-- Key Metrics -->
+    <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 mb-8">
+        <!-- TSMR Metric -->
+        <div class="metric-card">
+            <div class="flex items-center justify-between">
+                <div>
+                    <p class="text-sm text-gray-600">Teacher Specialization Match Rate</p>
+                    <p class="text-2xl font-bold" :class="getMetricColor(metrics.tsmr, 85)" x-text="metrics.tsmr + '%'"></p>
+                    <p class="text-xs text-gray-500 mt-1">Target: 85%</p>
+                </div>
+                <div class="text-blue-500">
+                    <svg class="h-8 w-8" fill="currentColor" viewBox="0 0 20 20">
+                        <path d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"/>
+                    </svg>
+                </div>
+            </div>
+            <div class="mt-4">
+                <div class="bg-gray-200 rounded-full h-2">
+                    <div class="bg-blue-600 h-2 rounded-full" :style="'width: ' + Math.min(metrics.tsmr, 100) + '%'"></div>
+                </div>
+            </div>
+        </div>
+        
+        <!-- LAI Metric -->
+        <div class="metric-card">
+            <div class="flex items-center justify-between">
+                <div>
+                    <p class="text-sm text-gray-600">License Alignment Index</p>
+                    <p class="text-2xl font-bold" :class="getMetricColor(metrics.lai, 90)" x-text="metrics.lai + '%'"></p>
+                    <p class="text-xs text-gray-500 mt-1">Target: 90%</p>
+                </div>
+                <div class="text-green-500">
+                    <svg class="h-8 w-8" fill="currentColor" viewBox="0 0 20 20">
+                        <path fill-rule="evenodd" d="M6.267 3.455a3.066 3.066 0 001.745-.723 3.066 3.066 0 013.976 0 3.066 3.066 0 001.745.723 3.066 3.066 0 012.812 2.812c.051.643.304 1.254.723 1.745a3.066 3.066 0 010 3.976 3.066 3.066 0 00-.723 1.745 3.066 3.066 0 01-2.812 2.812 3.066 3.066 0 00-1.745.723 3.066 3.066 0 01-3.976 0 3.066 3.066 0 00-1.745-.723 3.066 3.066 0 01-2.812-2.812 3.066 3.066 0 00-.723-1.745 3.066 3.066 0 010-3.976 3.066 3.066 0 00.723-1.745 3.066 3.066 0 012.812-2.812zm7.44 5.252a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clip-rule="evenodd"/>
+                    </svg>
+                </div>
+            </div>
+            <div class="mt-4">
+                <div class="bg-gray-200 rounded-full h-2">
+                    <div class="bg-green-600 h-2 rounded-full" :style="'width: ' + Math.min(metrics.lai, 100) + '%'"></div>
+                </div>
+            </div>
+        </div>
+        
+        <!-- DER Metric -->
+        <div class="metric-card">
+            <div class="flex items-center justify-between">
+                <div>
+                    <p class="text-sm text-gray-600">Deployment Efficiency Ratio</p>
+                    <p class="text-2xl font-bold" :class="getMetricColor(metrics.der, 80)" x-text="metrics.der + '%'"></p>
+                    <p class="text-xs text-gray-500 mt-1">Target: 80%</p>
+                </div>
+                <div class="text-purple-500">
+                    <svg class="h-8 w-8" fill="currentColor" viewBox="0 0 20 20">
+                        <path fill-rule="evenodd" d="M3 4a1 1 0 011-1h4a1 1 0 010 2H6.414l2.293 2.293a1 1 0 01-1.414 1.414L5 6.414V8a1 1 0 01-2 0V4zm9 1a1 1 0 010-2h4a1 1 0 011 1v4a1 1 0 01-2 0V6.414l-2.293 2.293a1 1 0 11-1.414-1.414L13.586 5H12zm-9 7a1 1 0 012 0v1.586l2.293-2.293a1 1 0 111.414 1.414L6.414 15H8a1 1 0 010 2H4a1 1 0 01-1-1v-4zm13-1a1 1 0 011 1v4a1 1 0 01-1 1h-4a1 1 0 010-2h1.586l-2.293-2.293a1 1 0 111.414-1.414L15 13.586V12a1 1 0 011-1z" clip-rule="evenodd"/>
+                    </svg>
+                </div>
+            </div>
+            <div class="mt-4">
+                <div class="bg-gray-200 rounded-full h-2">
+                    <div class="bg-purple-600 h-2 rounded-full" :style="'width: ' + Math.min(metrics.der, 100) + '%'"></div>
+                </div>
+            </div>
+        </div>
+        
+        <!-- Workload Metric -->
+        <div class="metric-card">
+            <div class="flex items-center justify-between">
+                <div>
+                    <p class="text-sm text-gray-600">Avg. Teacher Workload</p>
+                    <p class="text-2xl font-bold" :class="getWorkloadColor(metrics.avgWorkload)" x-text="metrics.avgWorkload + ' hrs'"></p>
+                    <p class="text-xs text-gray-500 mt-1">Optimal: 18-24 hrs</p>
+                </div>
+                <div class="text-orange-500">
+                    <svg class="h-8 w-8" fill="currentColor" viewBox="0 0 20 20">
+                        <path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm1-12a1 1 0 10-2 0v4a1 1 0 00.293.707l2.828 2.829a1 1 0 101.415-1.415L11 9.586V6z" clip-rule="evenodd"/>
+                    </svg>
+                </div>
+            </div>
+            <div class="mt-4">
+                <div class="bg-gray-200 rounded-full h-2">
+                    <div :class="getWorkloadBarColor(metrics.avgWorkload)" class="h-2 rounded-full" :style="'width: ' + Math.min(metrics.avgWorkload * 100 / 40, 100) + '%'"></div>
+                </div>
+            </div>
+        </div>
+    </div>
+    
+    <!-- Charts Row -->
+    <div class="grid grid-cols-1 lg:grid-cols-2 gap-6 mb-8">
+        <!-- Subject Mismatch Chart -->
+        <div class="card p-6">
+            <h3 class="text-lg font-semibold text-gray-900 mb-4">Subject-Specific Mismatch Rates</h3>
+            <canvas id="subjectChart" class="w-full h-64"></canvas>
+        </div>
+        
+        <!-- Teacher Workload Distribution -->
+        <div class="card p-6">
+            <h3 class="text-lg font-semibold text-gray-900 mb-4">Teacher Workload Distribution</h3>
+            <canvas id="workloadChart" class="w-full h-64"></canvas>
+        </div>
+    </div>
+    
+    <!-- Anomaly Detection -->
+    <div class="card p-6 mb-8">
+        <h3 class="text-lg font-semibold text-gray-900 mb-4">🔍 Anomaly Detection</h3>
+        <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
+            <template x-for="anomaly in anomalies" :key="anomaly.type">
+                <div class="p-4 rounded-lg border" :class="getAnomalyClass(anomaly.severity)">
+                    <div class="flex items-center justify-between">
+                        <div>
+                            <p class="font-medium" x-text="anomaly.type"></p>
+                            <p class="text-sm text-gray-600" x-text="anomaly.description"></p>
+                        </div>
+                        <div class="text-2xl font-bold" x-text="anomaly.count"></div>
+                    </div>
+                </div>
+            </template>
+        </div>
+    </div>
+    
+    <!-- Quick Actions -->
+    <div class="card p-6">
+        <h3 class="text-lg font-semibold text-gray-900 mb-4">Quick Actions</h3>
+        <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
+            <button @click="generateSchedule()" class="btn-primary flex items-center justify-center space-x-2">
+                <svg class="h-5 w-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 6v6m0 0v6m0-6h6m-6 0H6"/>
+                </svg>
+                <span>Generate Schedule</span>
+            </button>
+            
+            <button @click="exportReport()" class="btn-secondary flex items-center justify-center space-x-2">
+                <svg class="h-5 w-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 10v6m0 0l-3-3m3 3l3-3m2 8H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"/>
+                </svg>
+                <span>Export Report</span>
+            </button>
+            
+            <button @click="refreshData()" class="btn-secondary flex items-center justify-center space-x-2">
+                <svg class="h-5 w-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15"/>
+                </svg>
+                <span>Refresh Data</span>
+            </button>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block scripts %}
+<script>
+function dashboard() {
+    return {
+        loading: false,
+        metrics: {
+            tsmr: 67.5,
+            lai: 78.5,
+            der: 72.3,
+            avgWorkload: 22.5
+        },
+        anomalies: [
+            { type: 'Low-enrollment Gaming', description: 'Sections with <15 students', count: 2, severity: 'warning' },
+            { type: 'Ghost Subjects', description: 'Subjects not in MELC', count: 0, severity: 'success' },
+            { type: 'Advisory Overuse', description: 'Teachers with advisory only', count: 1, severity: 'warning' },
+            { type: 'Subject Rotation', description: 'Yearly subject changes', count: 3, severity: 'info' }
+        ],
+        subjectChart: null,
+        workloadChart: null,
+        
+        init() {
+            this.loadDashboardData();
+        },
+        
+        async loadDashboardData() {
+            this.loading = true;
+            try {
+                // Simulate API call
+                await new Promise(resolve => setTimeout(resolve, 1000));
+                
+                // Load metrics (in real app, fetch from API)
+                this.metrics = {
+                    tsmr: 67.5,
+                    lai: 78.5,
+                    der: 72.3,
+                    avgWorkload: 22.5
+                };
+                
+                // Initialize charts
+                this.initCharts();
+                
+            } catch (error) {
+                console.error('Error loading dashboard data:', error);
+                this.$store.app.showNotification('Error loading dashboard data', 'error');
+            } finally {
+                this.loading = false;
+            }
+        },
+        
+        initCharts() {
+            // Subject Mismatch Chart
+            const subjectCtx = document.getElementById('subjectChart').getContext('2d');
+            this.subjectChart = new Chart(subjectCtx, {
+                type: 'bar',
+                data: {
+                    labels: ['Mathematics', 'Science', 'English', 'Filipino', 'Social Studies'],
+                    datasets: [{
+                        label: 'Mismatch Rate (%)',
+                        data: [45, 52, 38, 29, 41],
+                        backgroundColor: [
+                            '#ef4444',
+                            '#f59e0b',
+                            '#10b981',
+                            '#3b82f6',
+                            '#8b5cf6'
+                        ],
+                        borderColor: [
+                            '#dc2626',
+                            '#d97706',
+                            '#059669',
+                            '#2563eb',
+                            '#7c3aed'
+                        ],
+                        borderWidth: 1
+                    }]
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    plugins: {
+                        legend: {
+                            display: false
+                        }
+                    },
+                    scales: {
+                        y: {
+                            beginAtZero: true,
+                            max: 100
+                        }
+                    }
+                }
+            });
+            
+            // Workload Distribution Chart
+            const workloadCtx = document.getElementById('workloadChart').getContext('2d');
+            this.workloadChart = new Chart(workloadCtx, {
+                type: 'doughnut',
+                data: {
+                    labels: ['Underloaded (<18 hrs)', 'Optimal (18-24 hrs)', 'Overloaded (>30 hrs)', 'Moderate (24-30 hrs)'],
+                    datasets: [{
+                        data: [15, 60, 10, 15],
+                        backgroundColor: [
+                            '#fbbf24',
+                            '#10b981',
+                            '#ef4444',
+                            '#f59e0b'
+                        ],
+                        borderColor: [
+                            '#f59e0b',
+                            '#059669',
+                            '#dc2626',
+                            '#d97706'
+                        ],
+                        borderWidth: 2
+                    }]
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    plugins: {
+                        legend: {
+                            position: 'bottom'
+                        }
+                    }
+                }
+            });
+        },
+        
+        getMetricColor(value, target) {
+            if (value >= target) return 'text-green-600';
+            if (value >= target * 0.8) return 'text-yellow-600';
+            return 'text-red-600';
+        },
+        
+        getWorkloadColor(value) {
+            if (value >= 18 && value <= 24) return 'text-green-600';
+            if (value > 30) return 'text-red-600';
+            return 'text-yellow-600';
+        },
+        
+        getWorkloadBarColor(value) {
+            if (value >= 18 && value <= 24) return 'bg-green-600';
+            if (value > 30) return 'bg-red-600';
+            return 'bg-yellow-600';
+        },
+        
+        getAnomalyClass(severity) {
+            switch(severity) {
+                case 'success': return 'status-success border';
+                case 'warning': return 'status-warning border';
+                case 'error': return 'status-error border';
+                default: return 'border-gray-200';
+            }
+        },
+        
+        async generateSchedule() {
+            this.loading = true;
+            try {
+                // Simulate API call to generate schedule
+                await new Promise(resolve => setTimeout(resolve, 2000));
+                this.$store.app.showNotification('Schedule generated successfully!', 'success');
+            } catch (error) {
+                this.$store.app.showNotification('Error generating schedule', 'error');
+            } finally {
+                this.loading = false;
+            }
+        },
+        
+        async exportReport() {
+            try {
+                // Simulate export
+                await new Promise(resolve => setTimeout(resolve, 1000));
+                this.$store.app.showNotification('Report exported successfully!', 'success');
+            } catch (error) {
+                this.$store.app.showNotification('Error exporting report', 'error');
+            }
+        },
+        
+        async refreshData() {
+            await this.loadDashboardData();
+            this.$store.app.showNotification('Data refreshed successfully!', 'info');
+        }
+    }
+}
+</script>
+{% endblock %}
