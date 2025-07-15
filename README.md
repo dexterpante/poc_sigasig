@@ -1,4 +1,4 @@
-# SIGASIG - Smart Intelligent Genetic Algorithm Scheduler for Institutional Governance
+# SIGASIG - School-wide Integrated Governance, Administration and Systemmatic Instructional Guidance
 
 SIGASIG is an advanced class scheduling system that uses linear programming optimization to automatically generate optimal timetables for educational institutions. The system intelligently assigns teachers, rooms, and classes while respecting constraints such as teacher qualifications, room availability, and workload limits.
 
@@ -247,18 +247,7 @@ SIGASIG provides comprehensive Key Performance Indicators (KPIs) specifically de
 - **Retention Rate**: Lower turnover in properly matched assignments
 - **Career Development**: Promotion rates for specialized teachers
 
-### 🌐 International Benchmarking
 
-#### **Global Comparison Metrics**
-- **Australia SiAS Survey**: Subject vs. training alignment
-- **USA NCES SASS**: License vs. subject matching
-- **Finland Model**: Weighted scoring including degree, minor, CPD, experience
-- **WHO Health Model**: Skill mix mismatch adjusted by training & practice
-
-#### **Best Practice Indicators**
-- **Competency Equivalence**: German TVET model adaptation
-- **Continuous Improvement**: Finnish professional development integration
-- **Policy Compliance**: Australian mandatory qualification standards
 
 ## Technology Stack
 
